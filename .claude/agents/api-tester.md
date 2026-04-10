@@ -1,7 +1,7 @@
 ---
 name: api-tester
 description: Use to test REST endpoints, validate response schemas, check auth guards, and write e2e test files. Invoke with @api-tester after implementing a new module or endpoint.
-model: claude-sonnet-4-6
+model: claude-sonnet-4-20250514
 tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 

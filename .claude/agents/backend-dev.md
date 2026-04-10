@@ -1,7 +1,7 @@
 ---
 name: backend-dev
 description: Use for implementing NestJS modules using the Repository Pattern, Prisma migrations, business logic, cron jobs, WebSocket gateways, and API endpoints. Always reads the spec in docs/specs/ before writing code. Invoke with @backend-dev.
-model: claude-sonnet-4-6
+model: claude-sonnet-4-20250514
 tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 

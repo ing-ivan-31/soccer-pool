@@ -40,14 +40,12 @@ Task: @backend-dev
 Read spec at $ARGUMENTS.
 Implement all endpoints listed in the API Contract.
 Follow Repository Pattern: controller → service → repository.
-Commit after each module: git add -A && git commit -m "feat(...): ..."
 
 Task: @frontend-dev
 Read spec at $ARGUMENTS.
 Implement all pages and components listed in "Frontend Changes".
 Update Zustand stores if listed in "State Management".
 Add TanStack Query hooks for new endpoints.
-Commit after each page: git add -A && git commit -m "feat(frontend/...): ..."
 ```
 
 ### After backend is complete
@@ -61,14 +59,13 @@ Write e2e test file to src/soccer-pool-api/test/
 
 ## Step 4 — Final validation
 Once all tasks complete:
-1. `cd src/soccer-pool-api && npm run test:e2e` — all tests pass
-2. `cd src/soccer-pool && npm run type-check` — zero TypeScript errors
-3. Review git log to confirm commits from each agent
+1. Ask the user to run `cd src/soccer-pool-api && npm run test:e2e` — all tests pass
+2. Ask the user to run `cd src/soccer-pool && npm run type-check` — zero TypeScript errors
 
 ## Step 5 — Mark as Done
 Edit the spec: `**Status:** In Progress` → `**Status:** Done`
 
 Output a summary:
 - What was implemented
-- Commits made (with hashes)
+- Files created or modified
 - Any known issues or follow-up tasks

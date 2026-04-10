@@ -59,7 +59,7 @@ This is the correct flow. **Never skip the spec step.**
        └─ @frontend-dev → pages + shadcn components + Zustand stores
    └─ @api-tester → validates everything at the end
 
-4. Review diffs and merge
+4. User reviews changes and commits manually
 ```
 
 ### Step-by-step example
@@ -126,8 +126,7 @@ structure this without breaking existing pools?
 ```
 @backend-dev implement the GroupsModule following the spec at
 docs/specs/2025-01-15-groups.md. Start with the repository layer, then service,
-then controller. Commit after each layer. Make sure the invite code generation
-uses nanoid and is 8 characters.
+then controller. Make sure the invite code generation uses nanoid and is 8 characters.
 ```
 
 ### Debugging
@@ -204,6 +203,7 @@ soccer-pool/
 1. **Plan mode first** — run `claude --plan` before implementing something large
 2. **Fresh context** — if a session is long, open a new one and reference files with `@`
 3. **One agent per task** — don't ask `@backend-dev` to also do the frontend
-4. **Read commits** — each sub-agent commits when done: `git log --oneline`
+4. **User handles git** — agents do not run git commands; review changes and commit yourself
 5. **Specs are documentation** — `docs/specs/` with `Status: Done` is your decision history
 6. **Background agents** — press `Ctrl+B` to send a long-running agent to background while you continue working
+7. **Version control** — the user handles all git operations manually; agents should not commit

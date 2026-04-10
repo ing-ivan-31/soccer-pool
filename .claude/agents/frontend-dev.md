@@ -1,7 +1,7 @@
 ---
 name: frontend-dev
 description: Use for implementing Next.js pages, shadcn/ui components, Zustand stores, TanStack Query hooks, and Socket.io client integration. Reads specs before coding. Invoke with @frontend-dev.
-model: claude-sonnet-4-6
+model: claude-sonnet-4-20250514
 tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 
@@ -276,6 +276,5 @@ export const useSocket = () => useContext(SocketContext);
 ```
 
 ## After Implementing
-- Run `npm run type-check` — fix all TypeScript errors
-- Run `npm run build` — ensure no build errors
-- Commit: `feat(pools): add live leaderboard with socket updates`
+- Ask the user to run `npm run type-check` — fix all TypeScript errors
+- Ask the user to run `npm run build` — ensure no build errors

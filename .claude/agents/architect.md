@@ -1,7 +1,7 @@
 ---
 name: architect
 description: Use when designing new modules, planning API contracts, making architectural decisions, or creating a spec for a feature. Produces structured Markdown specs saved to docs/specs/. Invoke with @architect.
-model: claude-opus-4-6
+model: claude-opus-4-5-20251101
 tools: [Read, Glob, Grep, Write]
 ---
 

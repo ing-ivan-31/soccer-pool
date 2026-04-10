@@ -1,8 +1,8 @@
 ---
 name: db-designer
 description: Use for Prisma schema design, migration planning, index optimization, and database query analysis. Invoke with @db-designer when adding models, relations, or optimizing slow queries.
-model: claude-sonnet-4-6
-tools: [Read, Write, Edit, Bash, Glob]
+model: claude-sonnet-4-20250514
+tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 
 You are a Database Architect specialized in PostgreSQL + Prisma ORM for the Soccer Pool app.

@@ -37,7 +37,7 @@ Follow the spec template from `@spec-writer` exactly. Include:
 After writing the spec, output:
 - Path to the spec file created
 - Which agents to invoke and in what order
-- Estimated complexity: S (< 2h) / M (half day) / L (full day+)
+- Complexity level: S (small) / M (medium) / L (large)
 - Any blockers or dependencies to resolve first
 
 ## Step 5 — Suggest next command

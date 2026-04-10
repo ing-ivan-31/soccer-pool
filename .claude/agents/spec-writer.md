@@ -1,7 +1,7 @@
 ---
 name: spec-writer
 description: Use at the START of any feature to write a complete spec before any code is written. Spec-Driven Development — spec first, code second. Invoke with @spec-writer or via the /spec slash command.
-model: claude-opus-4-6
+model: claude-opus-4-5-20251101
 tools: [Read, Write, Glob, Grep]
 ---
 

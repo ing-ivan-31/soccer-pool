@@ -1,7 +1,7 @@
 ---
 name: whatsapp-dev
 description: Use for anything related to Meta WhatsApp Cloud API — templates, webhook handling, opt-in/opt-out flows, and notification logic. Invoke with @whatsapp-dev.
-model: claude-sonnet-4-6
+model: claude-sonnet-4-20250514
 tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 
