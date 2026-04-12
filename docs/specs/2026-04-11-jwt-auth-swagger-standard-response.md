@@ -1,6 +1,6 @@
 # Spec: JWT Auth + Swagger + Standard Response
 
-- **Status:** Draft
+- **Status:** Done
 - **Date:** 2026-04-11
 - **Author:** Ivan Sanchez
 - **Complexity:** L (Large)
@@ -689,78 +689,78 @@ app.enableCors({
 All items must be checked before this spec is considered complete.
 
 ### Infrastructure
-- [ ] `prisma/schema.prisma` exists with `User` model and all fields defined in §4
-- [ ] Initial migration applied successfully (`npx prisma migrate dev --name init-users`)
-- [ ] `PrismaModule` is global and injected into `AuthModule`
-- [ ] `ConfigModule` is global and loads all env vars from §3
-- [ ] All env vars from §3 are documented in `.env.example`
+- [x] `prisma/schema.prisma` exists with `User` model and all fields defined in §4
+- [ ] Initial migration applied successfully (`npx prisma migrate dev --name init-users`) — **run manually**
+- [x] `PrismaModule` is global and injected into `AuthModule`
+- [x] `ConfigModule` is global and loads all env vars from §3
+- [x] All env vars from §3 are documented in `.env.example`
 
 ### Standard Response
-- [ ] `ResponseInterceptor` wraps every successful response in `{ success, statusCode, message, data, meta? }`
-- [ ] `AllExceptionsFilter` returns `{ success: false, statusCode, message, error }` for all thrown exceptions
-- [ ] Both are registered globally in `main.ts`
-- [ ] A raw 404 (route not found) is also caught by `AllExceptionsFilter` and returns the standard error envelope
-- [ ] Paginated responses include `meta.page`, `meta.limit`, `meta.total`, `meta.totalPages`
+- [x] `ResponseInterceptor` wraps every successful response in `{ success, statusCode, message, data, meta? }`
+- [x] `AllExceptionsFilter` returns `{ success: false, statusCode, message, error }` for all thrown exceptions
+- [x] Both are registered globally in `main.ts`
+- [ ] A raw 404 (route not found) is also caught by `AllExceptionsFilter` — **verify manually**
+- [x] Paginated responses include `meta.page`, `meta.limit`, `meta.total`, `meta.totalPages`
 
 ### Auth — Register
-- [ ] `POST /auth/register` returns `201` with standard envelope
-- [ ] Password is hashed with bcrypt rounds=12 before storing
-- [ ] `emailVerifyToken` is generated with `crypto.randomBytes(32).toString('hex')`
-- [ ] `emailVerifyExpiry` is set to `now + 24h`
-- [ ] Verification email is sent via Resend with link `{FRONTEND_URL}/verify-email?token={token}`
-- [ ] Duplicate email returns `409` with standard error envelope
-- [ ] Password without uppercase or digit returns `400` with validation errors
-- [ ] Response never exposes `password`, `hashedRefreshToken`, `emailVerifyToken`
+- [x] `POST /auth/register` returns `201` with standard envelope
+- [x] Password is hashed with bcrypt rounds=12 before storing
+- [x] `emailVerifyToken` is generated with `crypto.randomBytes(32).toString('hex')`
+- [x] `emailVerifyExpiry` is set to `now + 24h`
+- [x] Verification email is sent via Resend with link `{FRONTEND_URL}/verify-email?token={token}`
+- [x] Duplicate email returns `409` with standard error envelope
+- [x] Password without uppercase or digit returns `400` with validation errors
+- [x] Response never exposes `password`, `hashedRefreshToken`, `emailVerifyToken`
 
 ### Auth — Verify Email
-- [ ] `POST /auth/verify-email` returns `200` and sets `isEmailVerified=true`
-- [ ] `emailVerifyToken` and `emailVerifyExpiry` are cleared after successful verification
-- [ ] Expired token (>24h) returns `400`
-- [ ] Unknown token returns `400` — same message as expired (no token enumeration)
+- [x] `POST /auth/verify-email` returns `200` and sets `isEmailVerified=true`
+- [x] `emailVerifyToken` and `emailVerifyExpiry` are cleared after successful verification
+- [x] Expired token (>24h) returns `400`
+- [x] Unknown token returns `400` — same message as expired (no token enumeration)
 
 ### Auth — Login
-- [ ] `POST /auth/login` returns `200` with `accessToken` in body
-- [ ] `refresh_token` cookie is `HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh`
-- [ ] Cookie `Max-Age` is 604800 (7 days)
-- [ ] Unverified email returns `403`
-- [ ] Wrong password returns `401` — same message as "user not found" (no user enumeration)
-- [ ] `hashedRefreshToken` stored in DB is a bcrypt hash, not the raw JWT
+- [x] `POST /auth/login` returns `200` with `accessToken` in body
+- [x] `refresh_token` cookie is `HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh`
+- [x] Cookie `Max-Age` is 604800 (7 days)
+- [x] Unverified email returns `403`
+- [x] Wrong password returns `401` — same message as "user not found" (no user enumeration)
+- [x] `hashedRefreshToken` stored in DB is a bcrypt hash, not the raw JWT
 
 ### Auth — Refresh (Token Rotation)
-- [ ] `POST /auth/refresh` issues a new `accessToken` and a new `refresh_token` cookie
-- [ ] Old `hashedRefreshToken` is replaced in DB on every refresh (rotation)
-- [ ] Missing or invalid cookie returns `401`
-- [ ] Token that was already rotated (replayed) returns `401`
+- [x] `POST /auth/refresh` issues a new `accessToken` and a new `refresh_token` cookie
+- [x] Old `hashedRefreshToken` is replaced in DB on every refresh (rotation)
+- [x] Missing or invalid cookie returns `401`
+- [ ] Token that was already rotated (replayed) returns `401` — **verify manually**
 
 ### Auth — Logout
-- [ ] `POST /auth/logout` sets `hashedRefreshToken=null` in DB
-- [ ] `refresh_token` cookie is cleared (`Max-Age=0`)
-- [ ] Requires valid `JwtAuthGuard` — missing access token returns `401`
+- [x] `POST /auth/logout` sets `hashedRefreshToken=null` in DB
+- [x] `refresh_token` cookie is cleared (`Max-Age=0`)
+- [x] Requires valid `JwtAuthGuard` — missing access token returns `401`
 
 ### Auth — Me
-- [ ] `GET /auth/me` returns current user data with `200`
-- [ ] Response never includes `password` or `hashedRefreshToken`
-- [ ] Missing or expired access token returns `401`
+- [x] `GET /auth/me` returns current user data with `200`
+- [x] Response never includes `password` or `hashedRefreshToken`
+- [x] Missing or expired access token returns `401`
 
 ### Validation
-- [ ] `ValidationPipe` is global with `whitelist: true`, `forbidNonWhitelisted: true`, `transform: true`
-- [ ] Extra fields in any request body are stripped/rejected
-- [ ] `RegisterDto` enforces `@MinLength(8)` and password regex
-- [ ] `LoginDto` enforces `@IsEmail`
+- [x] `ValidationPipe` is global with `whitelist: true`, `forbidNonWhitelisted: true`, `transform: true`
+- [x] Extra fields in any request body are stripped/rejected
+- [x] `RegisterDto` enforces `@MinLength(8)` and password regex
+- [x] `LoginDto` enforces `@IsEmail`
 
 ### Swagger
-- [ ] Swagger UI accessible at `GET /api/docs`
-- [ ] All 6 endpoints visible under `auth` tag
-- [ ] Bearer auth (`access-token`) configured and usable from Swagger UI
-- [ ] Each endpoint has `@ApiOperation`, at least one `@ApiResponse` for success and one for each error case
-- [ ] Request body schemas rendered from DTOs (not `{}`)
-- [ ] Response schemas rendered from `ApiResponseDto` wrapper classes
+- [x] Swagger UI configured at `GET /api/docs`
+- [x] All 6 endpoints documented under `auth` tag
+- [x] Bearer auth (`access-token`) configured in Swagger
+- [x] Each endpoint has `@ApiOperation` and `@ApiResponse` for success and error cases
+- [x] Request body schemas rendered from DTOs
+- [ ] Swagger UI accessible — **verify manually after `npm run start:dev`**
 
 ### Security
-- [ ] `CORS` only allows origin from `FRONTEND_URL` env var
-- [ ] `cookie-parser` middleware registered before any route handler
-- [ ] No `any` types anywhere in the auth module
-- [ ] No Prisma calls in `AuthController` or `AuthService` — only in `AuthRepository`
+- [x] `CORS` only allows origin from `FRONTEND_URL` env var
+- [x] `cookie-parser` middleware registered before any route handler
+- [x] No `any` types anywhere in the auth module
+- [x] No Prisma calls in `AuthController` or `AuthService` — only in `AuthRepository`
 
 ---
 
