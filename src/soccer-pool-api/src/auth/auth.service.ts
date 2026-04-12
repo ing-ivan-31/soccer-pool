@@ -25,7 +25,10 @@ interface TokenPair {
   refreshToken: string;
 }
 
-type SafeUser = Omit<User, 'password' | 'hashedRefreshToken' | 'emailVerifyToken' | 'emailVerifyExpiry'>;
+type SafeUser = Omit<
+  User,
+  'password' | 'hashedRefreshToken' | 'emailVerifyToken' | 'emailVerifyExpiry'
+>;
 
 @Injectable()
 export class AuthService {
@@ -40,7 +43,9 @@ export class AuthService {
     this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
   }
 
-  async register(dto: RegisterDto): Promise<{ message: string; data: SafeUser }> {
+  async register(
+    dto: RegisterDto,
+  ): Promise<{ message: string; data: SafeUser }> {
     const existing = await this.authRepository.findByEmail(dto.email);
     if (existing) throw new ConflictException('Email already registered');
 
@@ -70,9 +75,15 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(token: string): Promise<{ message: string; data: SafeUser }> {
+  async verifyEmail(
+    token: string,
+  ): Promise<{ message: string; data: SafeUser }> {
     const user = await this.authRepository.findByEmailVerifyToken(token);
-    if (!user || !user.emailVerifyExpiry || user.emailVerifyExpiry < new Date()) {
+    if (
+      !user ||
+      !user.emailVerifyExpiry ||
+      user.emailVerifyExpiry < new Date()
+    ) {
       throw new BadRequestException('Token expirado o inválido');
     }
 
@@ -83,9 +94,17 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto, res: { cookie: (name: string, value: string, options: object) => void }): Promise<{ message: string; data: { accessToken: string; user: SafeUser } }> {
+  async login(
+    dto: LoginDto,
+    res: { cookie: (name: string, value: string, options: object) => void },
+  ): Promise<{
+    message: string;
+    data: { accessToken: string; user: SafeUser };
+  }> {
     const user = await this.authRepository.findByEmail(dto.email);
-    const isValidPassword = user ? await bcrypt.compare(dto.password, user.password) : false;
+    const isValidPassword = user
+      ? await bcrypt.compare(dto.password, user.password)
+      : false;
 
     if (!user || !isValidPassword) {
       throw new UnauthorizedException('Credenciales inválidas');
@@ -108,7 +127,11 @@ export class AuthService {
     };
   }
 
-  async refresh(userId: string, refreshToken: string, res: { cookie: (name: string, value: string, options: object) => void }): Promise<{ message: string; data: { accessToken: string } }> {
+  async refresh(
+    userId: string,
+    refreshToken: string,
+    res: { cookie: (name: string, value: string, options: object) => void },
+  ): Promise<{ message: string; data: { accessToken: string } }> {
     const user = await this.authRepository.findById(userId);
     if (!user || !user.hashedRefreshToken) {
       throw new UnauthorizedException('Acceso denegado');
@@ -127,7 +150,10 @@ export class AuthService {
     };
   }
 
-  async logout(userId: string, res: { clearCookie: (name: string, options: object) => void }): Promise<{ message: string; data: null }> {
+  async logout(
+    userId: string,
+    res: { clearCookie: (name: string, options: object) => void },
+  ): Promise<{ message: string; data: null }> {
     await this.authRepository.updateHashedRefreshToken(userId, null);
     res.clearCookie('refresh_token', { path: '/auth/refresh' });
     return { message: 'Sesión cerrada.', data: null };
@@ -139,32 +165,37 @@ export class AuthService {
     return { message: 'Perfil obtenido.', data: this.sanitizeUser(user) };
   }
 
-  private async generateTokens(userId: string, email: string): Promise<TokenPair> {
+  private async generateTokens(
+    userId: string,
+    email: string,
+  ): Promise<TokenPair> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, email } satisfies JwtPayload,
-        {
-          secret: this.configService.get<string>('JWT_SECRET'),
-          expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m',
-        },
-      ),
-      this.jwtService.signAsync(
-        { sub: userId } satisfies JwtPayload,
-        {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '7d',
-        },
-      ),
+      this.jwtService.signAsync({ sub: userId, email } satisfies JwtPayload, {
+        secret: this.configService.get('JWT_SECRET'),
+        expiresIn:
+          Number(this.configService.get('JWT_ACCESS_EXPIRES_IN')) || 3600,
+      }),
+      this.jwtService.signAsync({ sub: userId } satisfies JwtPayload, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn:
+          Number(this.configService.get('JWT_REFRESH_EXPIRES_IN')) || 604800,
+      }),
     ]);
     return { accessToken, refreshToken };
   }
 
-  private async storeRefreshToken(userId: string, refreshToken: string): Promise<void> {
+  private async storeRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<void> {
     const hashed = await bcrypt.hash(refreshToken, this.BCRYPT_ROUNDS);
     await this.authRepository.updateHashedRefreshToken(userId, hashed);
   }
 
-  private setRefreshCookie(res: { cookie: (name: string, value: string, options: object) => void }, token: string): void {
+  private setRefreshCookie(
+    res: { cookie: (name: string, value: string, options: object) => void },
+    token: string,
+  ): void {
     res.cookie('refresh_token', token, {
       httpOnly: true,
       secure: true,
@@ -176,7 +207,14 @@ export class AuthService {
 
   private sanitizeUser(user: User): SafeUser {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, hashedRefreshToken, emailVerifyToken, emailVerifyExpiry, ...safe } = user;
+    const {
+      password,
+      hashedRefreshToken,
+      emailVerifyToken,
+      emailVerifyExpiry,
+      ...safe
+    } = user;
+
     return safe;
   }
 }
