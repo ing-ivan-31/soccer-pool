@@ -1,9 +1,11 @@
 # Soccer Pool — Project Constitution
 
 ## Project Overview
+
 Fullstack app for football prediction pools. Users predict match results for World Cup, Champions League, Liga MX, and other competitions. Groups compete on a live leaderboard. Real-time updates via WebSocket. Notifications via email (Resend) and WhatsApp (Meta Cloud API).
 
 ## Repository Structure
+
 ```
 soccer-pool/
 ├── CLAUDE.md                        ← you are here
@@ -36,6 +38,7 @@ soccer-pool/
 ```
 
 ## Stack (do not change without discussion)
+
 - **Backend:** NestJS 10 + TypeScript strict mode
 - **Pattern:** Repository Pattern — every module has a repository layer between service and Prisma
 - **ORM:** Prisma + PostgreSQL (Railway in prod, Docker locally)
@@ -45,7 +48,7 @@ soccer-pool/
 - **Auth:** JWT (access 15min + refresh 7d httpOnly cookie) + Google OAuth2
 - **Email:** Resend + React Email templates
 - **WhatsApp:** Meta WhatsApp Cloud API (no SDK — native fetch to Graph API v19.0)
-- **Football data:** football-data.org free tier (10 req/min)
+- **Football data:** api-football.com (api-sports.io) — free tier 100 req/day, paid from $10/mo
 - **Deploy:** Railway (backend + postgres + frontend as separate services)
 - **CI/CD:** GitHub Actions
 
@@ -65,6 +68,7 @@ src/groups/
 ```
 
 **Rules:**
+
 - Controllers never call Prisma directly — only the service
 - Services never call Prisma directly — only the repository
 - Repositories contain ALL database queries for that module
@@ -72,6 +76,7 @@ src/groups/
 - Cross-module data access: import the other module's repository or service, never Prisma directly
 
 **Repository interface pattern:**
+
 ```typescript
 // groups.repository.ts
 @Injectable()
@@ -104,7 +109,7 @@ export class GroupsService {
 
   async joinGroup(userId: string, inviteCode: string): Promise<GroupMember> {
     const group = await this.groupsRepository.findByInviteCode(inviteCode);
-    if (!group) throw new NotFoundException('Group not found');
+    if (!group) throw new NotFoundException("Group not found");
     // business rule: check if already a member
     return this.groupsRepository.addMember(group.id, userId);
   }
@@ -114,11 +119,13 @@ export class GroupsService {
 ## Frontend — Component & State Architecture
 
 ### shadcn/ui (mandatory, not NextUI)
+
 - All UI built with shadcn/ui components (`npx shadcn-ui@latest add <component>`)
 - Custom components extend shadcn primitives — never build from scratch what shadcn provides
 - Tailwind CSS for styling — dark green theme with lime accent
 
 ### Zustand — Global State
+
 ```typescript
 // stores/auth.store.ts
 interface AuthState {
@@ -139,21 +146,24 @@ export const useAuthStore = create<AuthState>((set) => ({
 ```
 
 **What goes in Zustand (global client state):**
+
 - Auth state (user, accessToken)
 - Active pool/group selection
 - WebSocket connection status
 - UI preferences (sidebar open, theme)
 
 **What goes in TanStack Query (server state):**
+
 - Match lists, predictions, leaderboard data
 - Anything fetched from the API with caching
 
 ### TanStack Query — Server State
+
 ```typescript
 // hooks/use-matches.ts
 export function useMatches(date: string) {
   return useQuery({
-    queryKey: ['matches', date],
+    queryKey: ["matches", date],
     queryFn: () => api.matches.getByDate(date),
     staleTime: 30_000,
   });
@@ -163,6 +173,7 @@ export function useMatches(date: string) {
 ## Coding Conventions
 
 ### Backend (NestJS)
+
 - Strict TypeScript — no `any` types anywhere
 - DTOs use `class-validator` decorators — always validate inputs
 - Constructor injection only — never property injection
@@ -174,6 +185,7 @@ export function useMatches(date: string) {
 - No `any` types — use proper interfaces or Prisma-generated types
 
 ### Frontend (Next.js)
+
 - Server Components by default — `'use client'` only when needed
 - Server Components fetch data directly (no useEffect for initial load)
 - Client mutations via `useMutation` from TanStack Query
@@ -182,11 +194,13 @@ export function useMatches(date: string) {
 - shadcn components for all UI — never mix libraries
 
 ### General
+
 - Never commit `.env` files
 - All environment variables documented in `.env.example`
 - Never hardcoded api keys
 
 ## Environment Variables
+
 ```bash
 # src/soccer-pool-api/.env
 DATABASE_URL="postgresql://..."
@@ -194,7 +208,7 @@ JWT_SECRET="..."
 JWT_REFRESH_SECRET="..."
 GOOGLE_CLIENT_ID="..."
 GOOGLE_CLIENT_SECRET="..."
-FOOTBALL_API_KEY="..."          # football-data.org free key
+FOOTBALL_API_KEY="..."          # api-football.com (api-sports.io) key — free: 100 req/day, paid from $10/mo
 RESEND_API_KEY="re_..."         # resend.com free tier
 WA_TOKEN="EAAxxxxx..."          # Meta WhatsApp Cloud API token
 WA_PHONE_ID="..."               # WhatsApp Phone Number ID
@@ -208,15 +222,17 @@ NEXT_PUBLIC_WS_URL="http://localhost:3001"
 ```
 
 ## Key Business Rules (enforce in code)
+
 1. **Predictions lock** when match status becomes `IN_PLAY` or `PAUSED` — validate in `PredictionsService`
 2. **Points:** 3 pts exact score, 1 pt correct result — configurable per group in `Group` model
 3. **WhatsApp opt-in required** — never send WA messages if `whatsappOptIn = false` or `whatsappOptOut = true`
 4. **One prediction per user per match per group** — DB unique constraint `@@unique([userId, matchId, groupId])`
 5. **Group invite codes** — 8-character alphanumeric, unique, generated with `nanoid`
-6. **Football API rate limit:** max 10 req/min — throttle all calls in `FootballApiService`
+6. **Football API rate limit:** free tier 100 req/day, paid plans by minute — throttle all calls in `FootballApiService`. Cache aggressively: fixtures estáticos TTL largo, live scores TTL 15s.
 7. **Match sync frequency:** every 60s when `IN_PLAY`, every 5min otherwise
 
 ## Prisma Schema Key Models
+
 `User`, `Competition`, `Match`, `Group`, `GroupMember`, `Prediction`
 
 - `Match.status`: `SCHEDULED | IN_PLAY | PAUSED | FINISHED | POSTPONED | CANCELLED`
@@ -224,25 +240,39 @@ NEXT_PUBLIC_WS_URL="http://localhost:3001"
 - Run `npx prisma migrate dev` after schema changes — never edit migrations manually
 
 ## Football API Quick Reference
-Base URL: `https://api.football-data.org/v4`
-Header: `X-Auth-Token: {FOOTBALL_API_KEY}`
 
-Free competition IDs:
-- `2000` FIFA World Cup · `2001` Champions League · `2021` Premier League
-- `2014` La Liga · `2002` Bundesliga · `2019` Serie A · `2015` Ligue 1
+Provider: **api-football.com** (api-sports.io)
+Base URL: `https://v3.football.api-sports.io`
+Header: `x-apisports-key: {FOOTBALL_API_KEY}`
+
+Free tier: 100 req/day · Updates every 15s · All endpoints included · No credit card required
+Paid: from $10/mo → thousands of req/day
+
+World Cup 2026 IDs:
+
+- League ID: `1` (World Cup) · Season: `2026`
 
 Key endpoints:
-- `GET /competitions/{id}/matches?status=LIVE`
-- `GET /competitions/{id}/matches?dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD`
-- `GET /matches/{id}`
+
+- `GET /fixtures?league=1&season=2026&live=all` — partidos en vivo
+- `GET /fixtures?league=1&season=2026&date=YYYY-MM-DD` — por fecha
+- `GET /fixtures?id={id}` — partido específico
+- `GET /fixtures/events?fixture={id}` — goles, tarjetas, sustituciones en tiempo real
+- `GET /fixtures/lineups?fixture={id}` — alineaciones
+- `GET /fixtures/statistics?fixture={id}` — posesión, tiros, corners
+- `GET /standings?league=1&season=2026` — tabla de grupos
+- `GET /players/squads?team={id}` — jugadores por selección
+- `GET /teams?league=1&season=2026` — equipos participantes
 
 ## WhatsApp Integration Notes
+
 - Webhook verification: `GET /webhooks/whatsapp` — return `hub.challenge` if token matches
 - Incoming messages: `POST /webhooks/whatsapp` — handle `ACTIVAR` (opt-in) and `STOP` (opt-out)
 - Only use pre-approved templates for business-initiated messages
 - Approved templates: `match_reminder`, `match_result`, `ranking_leader`
 
 ## Common Commands
+
 ```bash
 # Backend
 cd src/soccer-pool-api
@@ -266,6 +296,7 @@ npm run lint               # eslint all packages
 ```
 
 ## Sub-agents Available (see .claude/agents/)
+
 - `@architect` — system design, module planning, API contracts
 - `@backend-dev` — NestJS + Repository Pattern implementation
 - `@frontend-dev` — Next.js, shadcn/ui, Zustand, TanStack Query
@@ -275,12 +306,14 @@ npm run lint               # eslint all packages
 - `@whatsapp-dev` — WhatsApp Cloud API integration
 
 ## Spec-Driven Workflow
+
 1. `/spec <feature>` → generates `docs/specs/YYYY-MM-DD-feature.md`
 2. Review and approve the spec (change Status: Draft → Approved)
 3. `/implement <spec-file>` → delegates to sub-agents with Task tool
 4. Sub-agents commit after each task — review diffs before merging
 
 ## Rules (never break):
+
 - Never implement a non-trivial feature without a spec. "Non-trivial" = anything touching auth, payments, data schema, or cross-module logic.
 - Never run builds/tests yourself
 - Never print full terminal output
